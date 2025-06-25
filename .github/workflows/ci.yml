@@ -1,0 +1,34 @@
+name: Health-aware Ci
+
+on:
+  push:
+    branches:
+      - main
+
+
+jobs:
+    health-check:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            
+            - name: install jq and curl
+              run: sudo apt-get update && sudo apt-get install -y jq curl
+              
+            - name: Run health check
+              run: ./health-check.sh
+              env:
+                PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL }}
+                SERVER_B_IP: ${{ secrets.SERVER_B_IP }}
+                CPU_THRESHOLD: 80
+                MEM_THRESHOLD: 20
+
+    test:
+        runs-on: ubuntu-latest
+        needs: health-check
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            
+            # continue with your test steps, build, etc.
